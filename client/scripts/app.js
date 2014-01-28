@@ -11,7 +11,7 @@ var ChatBox = Backbone.Model.extend({
   },
   submit: function(message){
     $.ajax({
-      url: 'https://api.parse.com/1/classes/chatterbox',
+      url: 'http://127.0.0.1:8080/1/classes/chatterbox',//https://api.parse.com/1/classes/chatterbox',
       type: 'POST',
       data: JSON.stringify({username: this.get('userName'),
                             text: message,
@@ -30,7 +30,7 @@ var ChatBox = Backbone.Model.extend({
     var room = this.get('roomname');
     this.get('roomname') && (data.where = {roomname:this.get('roomname')});
     $.ajax({
-      url: 'https://api.parse.com/1/classes/chatterbox',
+      url: 'http://127.0.0.1:8080/1/classes/chatterbox',//https://api.parse.com/1/classes/chatterbox',
       type: 'GET',
       //to apply restriction on data received (eg. sort, limit), 
       //pls create an object under data.
@@ -80,20 +80,23 @@ var ChatBoxView = Backbone.View.extend({
   initialize: function(){
     var options = {
       success:function (data) {
+        // console.log(data);
+        // data = JSON.parse(data);
+        // debugger;
         var model = this.model;
-        var messages = data.results
+        // var messages = data;
         $('#messages').html("");
-        this.displayMessages(messages);
-        this.buildRoomList(messages, model.get('roomList'), $('#rooms'));
+        this.displayMessages(data);
+        this.buildRoomList(data, model.get('roomList'), $('#rooms'));
       }.bind(this),
-      failure: function(data){console.log("Failed to get messages")}
-            };
-    setInterval(this.model.getMessage.bind(this.model,options), 1000);
+      failure: function(data){console.log("Failed to get messages");}
+    };
+    setInterval(this.model.getMessage.bind(this.model,options), 2000);
   },
   displayMessages: function(messages) {
     var context;
     var message_html;
-    var $messageBox; 
+    var $messageBox;
     var room = this.model.get('roomname');
     var source = $("#message-template").html();
     var template = Handlebars.compile(source);
@@ -105,7 +108,7 @@ var ChatBoxView = Backbone.View.extend({
       }
       context = {
         user_name: messages[i].username,
-        time: messages[i].updatedAt,
+        // time: messages[i].updatedAt,
         message: messages[i].text
       };
       message_html = template(context);
@@ -124,7 +127,7 @@ var ChatBoxView = Backbone.View.extend({
         $roomnameView.text(value.roomname);
         $roomListView.append($roomnameView);
       }
-    })
+    });
   }
 });
 

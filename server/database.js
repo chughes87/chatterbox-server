@@ -15,10 +15,10 @@ exports.clearDatabase = function(){
 };
 
 exports.addRoom = function(roomName){
-  connection.query(
-    'INSERT INTO Rooms (roomName) VALUES (\''+
-      roomName+'\')'
-  );
+  var sql = 'INSERT INTO Rooms SET ?';// (roomName) VALUES (??)';
+  var inserts = {roomName: roomName};
+  sql = mysql.format(sql, inserts);
+  connection.query(sql);
 };
 
 // exports.removeRoom = function(roomName){
@@ -30,14 +30,18 @@ exports.addRoom = function(roomName){
 
 exports.addUser = function(userName, roomName){
   roomName = roomName || 'main';
-  connection.query(
-    'INSERT INTO Users (userName, roomName) VALUES (\''+
-    userName+'\',\''+roomName+'\')');
+  var sql = 'INSERT INTO Users SET ?';//(userName, roomName) VALUES (??, ??)';
+  var inserts = {userName: userName, roomName: roomName};
+  sql = mysql.format(sql, inserts);
+  connection.query(sql);
 };
 
 exports.getUserById = function(userId, cb){
+  var sql = 'SELECT * FROM Users WHERE userId = ??';
+  var inserts = [userId]
+  sql = mysql.format(sql, inserts);
   connection.query(
-    'SELECT * FROM Users WHERE userId = \''+userId+'\'',
+    sql,
     function(err, results){
       if(err) throw err;
       cb(results[0]);
@@ -58,31 +62,37 @@ exports.getAllUsers = function(cb){
     function(err, results){
       if(err) throw err;
       cb(results);
-      // console.log('getAllUsers results: '+JSON.stringify(results));
+      console.log('getAllUsers results: '+JSON.stringify(results));
     }
   );
 };
 
 exports.addUserToRoom = function(userName, roomName){
-  var sql = 'UPDATE Users SET roomName = \''+roomName+'\'WHERE userName = \''+userName+'\'';
+  var sql = 'UPDATE Users SET roomName = ?? WHERE userName = ??';
+  var inserts = [roomName, userName];
+  sql = mysql.format(sql, inserts);
   connection.query(sql);
 };
 
 exports.getUserId = function(userName, cb){
+  var sql = 'SELECT userId FROM Users WHERE userName = ??';
+  var inserts = [userName];
+  sql = mysql.format(sql, inserts);
   connection.query(
-    'SELECT userId FROM Users WHERE userName = \''+userName+'\'',
+    sql,
     function(err, results){
       if(err) throw err;
-      // console.log('getUserId results:' + JSON.stringify(results));
+      console.log('getUserId results:' + JSON.stringify(results));
       cb(results[0].userId);
     }
   );
 };
 
 exports.addMessage = function(userId, message, roomName){
-  connection.query(
-    'INSERT INTO Messages (userId, roomName, text) VALUES (\''+
-    userId+'\',\''+roomName+'\',\''+message+'\')');
+  var sql = 'INSERT INTO Messages SET ?';//(userId, roomName, text) VALUES (??, ??, ??)';
+  var inserts = {userId: userId, roomName: roomName, text: message};
+  sql = mysql.format(sql, inserts);
+  connection.query(sql);
 };
 
 exports.getAllRooms = function(cb){
@@ -91,17 +101,20 @@ exports.getAllRooms = function(cb){
     function(err, results){
       if(err) throw err;
       cb(results);
-      // console.log('getAllRooms results: '+JSON.stringify(results));
+      console.log('getAllRooms results: '+JSON.stringify(results));
     }
   );
 };
 
 exports.getAllMessagesInRoom = function(roomName, cb){
+  var sql = 'SELECT * FROM Messages WHERE roomName = ??';
+  var inserts = [roomName];
+  sql = mysql.format(sql, inserts);
   connection.query(
-    'SELECT * FROM Messages WHERE roomName = \''+roomName+'\'',
+    sql,
     function(err, results){
       if(err) throw err;
-      // console.log('getAllUsersInRoom: results: '+JSON.stringify(results));
+      console.log('getAllUsersInRoom: results: '+JSON.stringify(results));
       cb(results);
     }
   );
